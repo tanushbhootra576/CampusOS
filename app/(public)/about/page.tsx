@@ -27,7 +27,7 @@ export default function Manifesto() {
       </nav>
 
       {/* Content */}
-      <article className="max-w-4xl mx-auto px-8 pt-32">
+      <article className="max-w-4xl mx-auto px-8 pt-12">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}

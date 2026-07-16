@@ -192,7 +192,7 @@ export default function Home() {
 
       {/* Value Proposition / Fluid Divider */}
       {/* Massive Call to Action */}
-      <section className="relative py-40 bg-[#D95A3B] text-[#F4F3EF] overflow-hidden flex flex-col items-center justify-center min-h-[80vh] cursor-none">
+      <section className="relative pt-40 bg-[#D95A3B] text-[#F4F3EF] overflow-hidden flex flex-col items-center justify-center min-h-[80vh] cursor-none">
         <motion.div 
           style={{ y: y1 }}
           className="absolute inset-0 w-full h-full flex items-center justify-center opacity-10 pointer-events-none"
@@ -203,7 +203,7 @@ export default function Home() {
         </motion.div>
 
         <div 
-          className="relative z-10 text-center flex flex-col items-center flex-1 justify-center"
+          className="relative z-10 text-center flex flex-col items-center flex-1 justify-center my-20"
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
@@ -219,15 +219,15 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="w-full mt-auto pt-24 px-12 pb-8 flex flex-col md:flex-row justify-between items-end relative z-10">
+        <footer className="w-full mt-auto pt-24 px-8 pb-8 flex flex-col md:flex-row justify-between items-end relative z-10 bg-[#D95A3B]">
           <div className="flex flex-col gap-2">
-            <h3 className="text-4xl font-black tracking-tighter uppercase">Campus_OS©</h3>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-60">2026 // ALL RIGHTS RESERVED</p>
+            <h3 className="text-4xl font-black tracking-tighter uppercase">Campus_OS<span className="text-[#1A1A1A]">©</span></h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">2026 // ALL RIGHTS RESERVED</p>
           </div>
-          <div className="flex gap-8 mt-12 md:mt-0 text-xs font-bold uppercase tracking-widest">
-            <Link href="/about" className="hover:opacity-60 transition-opacity">Manifesto</Link>
-            <Link href="/dashboard" className="hover:opacity-60 transition-opacity">Platform</Link>
-            <Link href="https://github.com" className="hover:opacity-60 transition-opacity">Source</Link>
+          <div className="flex gap-8 mt-12 md:mt-0 text-[10px] font-bold uppercase tracking-widest text-[#1A1A1A]">
+            <Link href="/about" className="hover:text-white transition-colors">Manifesto</Link>
+            <Link href="/dashboard" className="hover:text-white transition-colors">Platform</Link>
+            <Link href="https://github.com" className="hover:text-white transition-colors">Source</Link>
           </div>
         </footer>
       </section>
