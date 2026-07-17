@@ -4,13 +4,14 @@ import clientPromise from "@/src/lib/mongodb-client";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const client = await clientPromise;
   const db = client.db();
 
   const project = await db.collection("projects").findOne({
-    _id: new ObjectId(params.id),
+    _id: new ObjectId(id),
   });
 
   if (!project) {
@@ -25,8 +26,9 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const body = await req.json();
 
   const client = await clientPromise;
@@ -34,7 +36,7 @@ export async function PATCH(
 
   await db.collection("projects").updateOne(
     {
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
     },
     {
       $set: body,
@@ -48,13 +50,14 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const client = await clientPromise;
   const db = client.db();
 
   await db.collection("projects").deleteOne({
-    _id: new ObjectId(params.id),
+    _id: new ObjectId(id),
   });
 
   return NextResponse.json({
