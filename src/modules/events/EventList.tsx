@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   MapPin,
@@ -7,46 +8,66 @@ import {
   Users,
 } from "lucide-react";
 
-const events = [
-  {
-    id: 1,
-    title: "Tech Symposium 2026",
-    date: "22 July 2026",
-    location: "Main Auditorium",
-    attendees: 320,
-    category: "Technology",
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
-    description:
-      "Join industry experts and students for talks, workshops, and networking.",
-  },
-  {
-    id: 2,
-    title: "Hackathon 24 Hours",
-    date: "28 July 2026",
-    location: "Innovation Lab",
-    attendees: 180,
-    category: "Competition",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-    description:
-      "Build innovative solutions with your team and compete for exciting prizes.",
-  },
-  {
-    id: 3,
-    title: "AI Workshop",
-    date: "5 August 2026",
-    location: "Seminar Hall",
-    attendees: 140,
-    category: "Workshop",
-    image:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
-    description:
-      "Hands-on session covering modern AI tools and machine learning workflows.",
-  },
-];
+interface Event {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  date: string;
+  location: string;
+  image?: string;
+  attendees: number;
+}
 
 export default function EventList() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const res = await fetch("/api/events");
+        const data = await res.json();
+        setEvents(data);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchEvents();
+  }, []);
+
+  async function registerEvent(id: string) {
+    try {
+      await fetch(`/api/events/${id}/register`, {
+        method: "POST",
+      });
+
+      setEvents((prev) =>
+        prev.map((event) =>
+          event._id === id
+            ? {
+                ...event,
+                attendees: event.attendees + 1,
+              }
+            : event
+        )
+      );
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        Loading events...
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
 
@@ -65,7 +86,6 @@ export default function EventList() {
         </div>
 
         <div className="relative w-full md:w-80">
-
           <Search
             className="absolute left-3 top-3 text-gray-400"
             size={18}
@@ -75,7 +95,6 @@ export default function EventList() {
             placeholder="Search events..."
             className="w-full border rounded-xl pl-10 py-3 pr-4 focus:ring-2 focus:ring-blue-500 outline-none"
           />
-
         </div>
 
       </div>
@@ -83,7 +102,6 @@ export default function EventList() {
       {/* Categories */}
 
       <div className="flex flex-wrap gap-3">
-
         {[
           "All",
           "Technology",
@@ -98,7 +116,6 @@ export default function EventList() {
             {item}
           </button>
         ))}
-
       </div>
 
       {/* Event Grid */}
@@ -108,12 +125,12 @@ export default function EventList() {
         {events.map((event) => (
 
           <div
-            key={event.id}
+            key={event._id}
             className="rounded-2xl overflow-hidden bg-white shadow hover:shadow-xl transition"
           >
 
             <img
-              src={event.image}
+              src={event.image || "/images/event-placeholder.png"}
               alt={event.title}
               className="h-52 w-full object-cover"
             />
@@ -151,7 +168,10 @@ export default function EventList() {
 
               </div>
 
-              <button className="mt-6 w-full rounded-xl bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition">
+              <button
+                onClick={() => registerEvent(event._id)}
+                className="mt-6 w-full rounded-xl bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition"
+              >
                 Register Now
               </button>
 
@@ -162,6 +182,7 @@ export default function EventList() {
         ))}
 
       </div>
+
     </div>
   );
 }
