@@ -1,61 +1,30 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/src/lib/mongodb-client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import connectToDatabase from "@/src/lib/mongodb";
+import Project from "@/src/db/models/Project";
 
 export async function GET() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-
-    const projects = await db
-      .collection("projects")
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    return NextResponse.json(projects);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch projects" },
-      { status: 500 }
-    );
-  }
+  await connectToDatabase();
+  const projects = await Project.find({}).sort({ createdAt: -1 }).populate('owner', 'name image');
+  return NextResponse.json(projects);
 }
 
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json();
+  body.owner = session.user.id;
+  await connectToDatabase();
+
   try {
-    const body = await req.json();
-
-    const client = await clientPromise;
-    const db = client.db();
-
-    const project = {
-      title: body.title,
-      description: body.description,
-      techStack: body.techStack ?? [],
-      githubUrl: body.githubUrl ?? "",
-      demoUrl: body.demoUrl ?? "",
-      image: body.image ?? "",
-      owner: body.owner ?? "",
-      likes: 0,
-      views: 0,
-      createdAt: new Date(),
-    };
-
-    const result = await db.collection("projects").insertOne(project);
-
-    return NextResponse.json(
-      {
-        _id: result.insertedId,
-        ...project,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to create project" },
-      { status: 500 }
-    );
+    const project = await Project.create(body);
+    return NextResponse.json(project, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

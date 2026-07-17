@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectToDatabase from "@/src/lib/mongodb";
-import Event from "@/src/db/models/Event";
+import Announcement from "@/src/db/models/Announcement";
 
 export async function GET() {
   await connectToDatabase();
-  const events = await Event.find({}).sort({ date: 1 }).populate('organizer');
-  return NextResponse.json(events);
+  const announcements = await Announcement.find({}).sort({ createdAt: -1 }).populate('club', 'name logoUrl');
+  return NextResponse.json(announcements);
 }
 
 export async function POST(req: Request) {
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
   await connectToDatabase();
 
   try {
-    const event = await Event.create(body);
-    return NextResponse.json(event, { status: 201 });
+    const announcement = await Announcement.create(body);
+    return NextResponse.json(announcement, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

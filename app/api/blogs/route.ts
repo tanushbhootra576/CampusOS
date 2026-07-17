@@ -1,60 +1,30 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/src/lib/mongodb-client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import connectToDatabase from "@/src/lib/mongodb";
+import Blog from "@/src/db/models/Blog";
 
 export async function GET() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-
-    const blogs = await db
-      .collection("blogs")
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    return NextResponse.json(blogs);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch blogs" },
-      { status: 500 }
-    );
-  }
+  await connectToDatabase();
+  const blogs = await Blog.find({}).sort({ createdAt: -1 }).populate('author', 'name image');
+  return NextResponse.json(blogs);
 }
 
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json();
+  body.author = session.user.id;
+  await connectToDatabase();
+
   try {
-    const body = await req.json();
-
-    const blog = {
-      title: body.title,
-      description: body.description,
-      content: body.content,
-      author: body.author,
-      category: body.category,
-      tags: body.tags ?? [],
-      image: body.image ?? "",
-      likes: 0,
-      createdAt: new Date(),
-    };
-
-    const client = await clientPromise;
-    const db = client.db();
-
-    const result = await db.collection("blogs").insertOne(blog);
-
-    return NextResponse.json(
-      {
-        _id: result.insertedId,
-        ...blog,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to create blog" },
-      { status: 500 }
-    );
+    const blog = await Blog.create(body);
+    return NextResponse.json(blog, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
