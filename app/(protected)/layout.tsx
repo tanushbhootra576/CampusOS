@@ -9,10 +9,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Platform", href: "/dashboard", icon: Home },
-    { name: "Events", href: "/my-events", icon: Calendar },
-    { name: "Clubs", href: "/my-clubs", icon: Users },
-    { name: "Projects", href: "/my-projects", icon: Folder },
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Clubs", href: "/communities", icon: Users },
+    { name: "Events", href: "/events", icon: Calendar },
+    { name: "Announcements", href: "/announcements", icon: Bell },
+    { name: "Projects", href: "/projects", icon: Folder },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
