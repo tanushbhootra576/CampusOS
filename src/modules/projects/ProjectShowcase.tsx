@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
 import {
   Search,
-  Github,
   ExternalLink,
   Star,
   Eye,
@@ -144,7 +144,7 @@ export default function ProjectShowcase() {
                   rel="noopener noreferrer"
                   className="flex-1 flex justify-center items-center gap-2 rounded-xl border py-3 hover:bg-gray-100"
                 >
-                  <Github size={18} />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.24c3-.34 6-1.53 6-6.76a5.5 5.5 0 0 0-1.5-3.89 5 5 0 0 0-.15-3.82s-1.18-.38-3.9 1.4a13.3 13.3 0 0 0-7 0C4.3 3.86 3.12 4.24 3.12 4.24a5 5 0 0 0-.15 3.82 5.5 5.5 0 0 0-1.5 3.89c0 5.23 3 6.42 6 6.76a4.8 4.8 0 0 0-1 3.24v4"></path></svg>
                   Code
                 </a>
 
