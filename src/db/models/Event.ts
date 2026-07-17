@@ -5,6 +5,8 @@ export interface IEvent extends Document {
   description: string;
   date: Date;
   location: string;
+  time: string;
+  registrationLimit?: number;
   organizer: mongoose.Types.ObjectId; // Reference to Community
   attendees: mongoose.Types.ObjectId[]; // Reference to Users
   createdAt: Date;
@@ -17,6 +19,8 @@ const EventSchema = new Schema<IEvent>(
     description: { type: String, required: true },
     date: { type: Date, required: true },
     location: { type: String, required: true },
+    time: { type: String, required: true, default: '10:00 AM' },
+    registrationLimit: { type: Number },
     organizer: { type: Schema.Types.ObjectId, ref: 'Community', required: true },
     attendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },

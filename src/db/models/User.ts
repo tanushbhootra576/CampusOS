@@ -4,7 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   image?: string;
-  role: 'student' | 'admin' | 'faculty';
+  role: 'student' | 'club_admin' | 'super_admin';
   points: number;
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +17,7 @@ const UserSchema = new Schema<IUser>(
     image: { type: String },
     role: { 
       type: String, 
-      enum: ['student', 'admin', 'faculty'], 
+      enum: ['student', 'club_admin', 'super_admin'], 
       default: 'student' 
     },
     points: { type: Number, default: 0 },
