@@ -9,7 +9,6 @@ import connectToDatabase from "@/src/lib/mongodb";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
-  // @ts-expect-error adapter typing issue with next-auth v4
   adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
@@ -43,7 +42,6 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // @ts-expect-error role exists
         token.role = user.role || 'student';
       }
       return token;
@@ -51,7 +49,6 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        // @ts-expect-error role exists
         session.user.role = token.role as string;
       }
       return session;
