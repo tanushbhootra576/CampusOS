@@ -1,83 +1,237 @@
+"use client";
+
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { ArrowRight, Sparkles, Layers, Users, Zap, Menu } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
+
+// Fluid Magnetic Button Component
+const MagneticButton = ({ children, className, onMouseEnter, onMouseLeave, ...props }: any) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current!.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
+  };
+
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const { x, y } = position;
+
+  return (
+    <motion.button
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={(e) => {
+        reset();
+        if (onMouseLeave) onMouseLeave(e);
+      }}
+      onMouseEnter={onMouseEnter}
+      animate={{ x, y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </motion.button>
+  );
+};
 
 export default function Home() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const { scrollYProgress } = useScroll();
+  
+  // Smooth scroll progress
+  const smoothProgress = useSpring(scrollYProgress, { damping: 20, stiffness: 100 });
+  
+  // Parallax values
+  const y1 = useTransform(smoothProgress, [0, 1], [0, 300]);
+  const y2 = useTransform(smoothProgress, [0, 1], [0, -300]);
+  const opacityFade = useTransform(smoothProgress, [0, 0.2], [1, 0]);
+  const scaleImage = useTransform(smoothProgress, [0, 1], [1, 1.2]);
+
+  useEffect(() => {
+    const updateMousePosition = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", updateMousePosition);
+    return () => window.removeEventListener("mousemove", updateMousePosition);
+  }, []);
+
+  // Text Reveal Animation variants
+  const wordVariants = {
+    hidden: { y: "110%", opacity: 0 },
+    visible: (i: number) => ({
+      y: "0%",
+      opacity: 1,
+      transition: { duration: 1, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }
+    }),
+  };
+
+  const splitText = (text: string) => {
+    return text.split(" ").map((word, i) => (
+      <span key={i} className="inline-block overflow-hidden pb-2 mr-4 lg:mr-8">
+        <motion.span 
+          custom={i} 
+          variants={wordVariants} 
+          initial="hidden" 
+          animate="visible" 
+          className="inline-block"
+        >
+          {word}
+        </motion.span>
+      </span>
+    ));
+  };
+
   return (
-    <main className="min-h-[90vh] bg-slate-50 flex flex-col justify-center py-12 lg:py-24 px-6 overflow-hidden">
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <main className="relative bg-[#F4F3EF] text-[#1A1A1A] min-h-screen overflow-hidden selection:bg-[#D95A3B] selection:text-white font-sans">
+      
+      {/* Custom Fluid Cursor */}
+      <motion.div
+        className="fixed top-0 left-0 w-6 h-6 rounded-full bg-[#D95A3B] pointer-events-none z-[100] mix-blend-multiply flex items-center justify-center hidden md:flex"
+        animate={{
+          x: mousePosition.x - 12,
+          y: mousePosition.y - 12,
+          scale: isHovering ? 3 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.5 }}
+      >
+        <AnimatePresence>
+          {isHovering && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className="text-white text-[6px] font-bold tracking-widest uppercase absolute"
+            >
+              View
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Film Grain Texture */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-50 w-full h-full opacity-[0.06] mix-blend-multiply"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+      ></div>
+
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-40 p-8 flex justify-between items-center mix-blend-difference text-[#F4F3EF]">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="font-bold text-sm tracking-widest uppercase"
+        >
+          Campus_OS<span className="text-[#D95A3B]">©</span>
+        </motion.div>
         
-        {/* Left Content - Typography & CTA */}
-        <div className="flex flex-col gap-8 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/50 text-slate-800 font-semibold text-sm w-max border border-slate-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            The Campus Operating System
-          </div>
-          
-          <h1 className="text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-[1.1]">
-            Unify Your <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-violet-600">
-              Campus.
-            </span>
-          </h1>
-          
-          <p className="text-xl text-slate-600 font-medium leading-relaxed">
-            Stop juggling spreadsheets and group chats. CampusOS brings every club, event, and student project into one powerful, centralized workspace.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <Link href="/events" className="group relative px-8 py-4 bg-slate-900 text-white rounded-xl font-bold text-lg overflow-hidden flex justify-center items-center">
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10 flex items-center gap-2">
-                Explore Platform 
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </span>
-            </Link>
-            <Link href="/dashboard" className="px-8 py-4 bg-white text-slate-900 border-2 border-slate-200 rounded-xl font-bold text-lg hover:border-slate-900 transition-colors flex justify-center items-center">
-              Go to Dashboard
-            </Link>
-          </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.1 }}
+          className="flex items-center gap-8 text-xs font-bold uppercase tracking-[0.2em]"
+        >
+          <Link href="/dashboard" className="hidden md:block hover:text-[#D95A3B] transition-colors">Platform</Link>
+          <Link href="/about" className="hidden md:block hover:text-[#D95A3B] transition-colors">Manifesto</Link>
+          <MagneticButton className="flex items-center justify-center w-12 h-12 rounded-full border border-white/20 hover:bg-white hover:text-black transition-colors cursor-none">
+            <Menu className="w-4 h-4" />
+          </MagneticButton>
+        </motion.div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex flex-col justify-end px-8 pb-16 md:pb-32 pt-32 cursor-none">
+        <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center pointer-events-none">
+          <motion.div style={{ scale: scaleImage }} className="w-full h-full origin-bottom">
+            <div className="absolute top-1/4 right-1/4 w-[40vw] h-[40vw] bg-[#EAE8E3] rounded-full blur-3xl opacity-50 mix-blend-multiply"></div>
+            <div className="absolute bottom-1/4 left-1/4 w-[30vw] h-[30vw] bg-[#D95A3B] rounded-full blur-3xl opacity-20 mix-blend-multiply"></div>
+          </motion.div>
         </div>
 
-        {/* Right Content - Bento Box Grid */}
-        <div className="grid grid-cols-2 gap-4 h-[500px] lg:h-[600px]">
-          {/* Bento Box 1 - Events (Large) */}
-          <div className="col-span-2 row-span-2 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <svg className="w-32 h-32 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
+        <div className="relative z-10 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+          <div className="max-w-5xl">
+            <h1 className="text-[clamp(4rem,12vw,14rem)] leading-[0.85] font-black tracking-tighter uppercase">
+              {splitText("Elevate Your")}
+              <br />
+              <span className="text-[#D95A3B]">{splitText("Campus.")}</span>
+            </h1>
+          </div>
+          
+          <motion.div 
+            style={{ opacity: opacityFade }}
+            className="flex flex-col gap-6 max-w-sm lg:pb-4"
+          >
+            <p className="text-lg md:text-xl font-medium text-[#1A1A1A]/70 leading-relaxed">
+              An editorial approach to campus management. Pure clarity, zero friction, absolute control.
+            </p>
+            <div className="flex items-center gap-4">
+              <MagneticButton 
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className="group flex items-center gap-3 bg-[#1A1A1A] text-[#F4F3EF] px-8 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D95A3B] transition-colors duration-500 cursor-none"
+              >
+                <Link href="/auth/signup" className="flex items-center gap-2">
+                  Launch System
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </MagneticButton>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">Event Hub</h3>
-            <p className="text-slate-500 font-medium max-w-sm">Seamless ticketing and registrations for symposiums and workshops.</p>
-            
-            {/* Mock UI Element */}
-            <div className="absolute bottom-0 left-8 right-8 h-32 bg-slate-50 rounded-t-2xl border border-b-0 border-slate-200 p-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-              <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm mb-2">
-                <div className="w-1/2 h-4 bg-slate-200 rounded-full"></div>
-                <div className="w-1/4 h-6 bg-blue-100 rounded-md"></div>
-              </div>
-              <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
-                <div className="w-2/3 h-4 bg-slate-200 rounded-full"></div>
-                <div className="w-1/5 h-6 bg-blue-100 rounded-md"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bento Box 2 - Leaderboard */}
-          <div className="bg-slate-900 text-white rounded-3xl p-6 relative overflow-hidden group hover:ring-4 ring-slate-200 transition-all">
-            <h3 className="text-xl font-bold mb-2">Global Leaderboards</h3>
-            <p className="text-slate-400 text-sm">Gamify open-source contributions.</p>
-            <div className="absolute -bottom-4 -right-4 text-7xl opacity-50 group-hover:scale-110 transition-transform">🏆</div>
-          </div>
-
-          {/* Bento Box 3 - Projects */}
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-3xl p-6 relative overflow-hidden group hover:shadow-lg hover:shadow-blue-500/30 transition-all">
-            <h3 className="text-xl font-bold mb-2">Project Showcases</h3>
-            <p className="text-blue-100 text-sm">A unified portfolio for your campus.</p>
-            <div className="absolute -bottom-4 -right-4 text-7xl opacity-50 group-hover:scale-110 transition-transform">🚀</div>
-          </div>
+          </motion.div>
         </div>
-        
-      </div>
+      </section>
+
+      {/* Value Proposition / Fluid Divider */}
+      {/* Massive Call to Action */}
+      <section className="relative pt-40 bg-[#D95A3B] text-[#F4F3EF] overflow-hidden flex flex-col items-center justify-center min-h-[80vh] cursor-none">
+        <motion.div 
+          style={{ y: y1 }}
+          className="absolute inset-0 w-full h-full flex items-center justify-center opacity-10 pointer-events-none"
+        >
+          <div className="w-[150vw] h-[150vw] border-[1px] border-white rounded-full"></div>
+          <div className="absolute w-[100vw] h-[100vw] border-[1px] border-white rounded-full"></div>
+          <div className="absolute w-[50vw] h-[50vw] border-[1px] border-white rounded-full"></div>
+        </motion.div>
+
+        <div 
+          className="relative z-10 text-center flex flex-col items-center flex-1 justify-center my-20"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          <h2 className="text-[clamp(3rem,8vw,10rem)] leading-none font-black uppercase tracking-tighter mb-12">
+            The standard<br/>has been set.
+          </h2>
+          <MagneticButton className="group relative px-12 py-6 bg-[#1A1A1A] text-[#F4F3EF] rounded-full text-lg font-bold uppercase tracking-widest overflow-hidden hover:scale-105 transition-transform duration-500 cursor-none">
+            <Link href="/auth/signup" className="relative z-10 flex items-center gap-4">
+              Get Access
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            </Link>
+          </MagneticButton>
+        </div>
+
+        {/* Footer */}
+        <footer className="w-full mt-auto pt-24 px-8 pb-8 flex flex-col md:flex-row justify-between items-end relative z-10 bg-[#D95A3B]">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-4xl font-black tracking-tighter uppercase">Campus_OS<span className="text-[#1A1A1A]">©</span></h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">2026 // ALL RIGHTS RESERVED</p>
+          </div>
+          <div className="flex gap-8 mt-12 md:mt-0 text-[10px] font-bold uppercase tracking-widest text-[#1A1A1A]">
+            <Link href="/about" className="hover:text-white transition-colors">Manifesto</Link>
+            <Link href="/dashboard" className="hover:text-white transition-colors">Platform</Link>
+            <Link href="https://github.com" className="hover:text-white transition-colors">Source</Link>
+          </div>
+        </footer>
+      </section>
+
     </main>
   );
 }
