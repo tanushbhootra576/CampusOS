@@ -1,12 +1,17 @@
 "use client";
 
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, Layers, Users, Zap, Menu } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 
+import { HTMLMotionProps } from "framer-motion";
+
 // Fluid Magnetic Button Component
-const MagneticButton = ({ children, className, onMouseEnter, onMouseLeave, ...props }: any) => {
+interface MagneticButtonProps extends HTMLMotionProps<"button"> {
+  children: React.ReactNode;
+}
+const MagneticButton = ({ children, className, onMouseEnter, onMouseLeave, ...props }: MagneticButtonProps) => {
   const ref = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -53,7 +58,6 @@ export default function Home() {
   
   // Parallax values
   const y1 = useTransform(smoothProgress, [0, 1], [0, 300]);
-  const y2 = useTransform(smoothProgress, [0, 1], [0, -300]);
   const opacityFade = useTransform(smoothProgress, [0, 0.2], [1, 0]);
   const scaleImage = useTransform(smoothProgress, [0, 1], [1, 1.2]);
 
@@ -71,7 +75,7 @@ export default function Home() {
     visible: (i: number) => ({
       y: "0%",
       opacity: 1,
-      transition: { duration: 1, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }
+      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: i * 0.05 }
     }),
   };
 
