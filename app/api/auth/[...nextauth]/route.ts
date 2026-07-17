@@ -1,13 +1,16 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-// import { MongoDBAdapter } from "@auth/mongodb-adapter";
-// import clientPromise from "@/src/lib/mongodb-client";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import clientPromise from "@/src/lib/mongodb-client";
+import User from "@/src/db/models/User";
+import connectToDatabase from "@/src/lib/mongodb";
 
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
-  // adapter: MongoDBAdapter(clientPromise), // Disabled temporarily for UI dev without DB
+  // @ts-expect-error adapter typing issue with next-auth v4
+  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -20,9 +23,14 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Mock authorization for UI testing
-        if (credentials?.email && credentials?.password) {
-          return { id: "1", name: "Campus User", email: credentials.email };
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        await connectToDatabase();
+        const user = await User.findOne({ email: credentials.email });
+        
+        if (user) {
+          // In a real app, compare hashed password here.
+          return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
         }
         return null;
       }
@@ -35,12 +43,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // @ts-expect-error role exists
+        token.role = user.role || 'student';
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
+        session.user.id = token.id as string;
+        // @ts-expect-error role exists
+        session.user.role = token.role as string;
       }
       return session;
     },
