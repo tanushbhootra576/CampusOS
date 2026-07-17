@@ -1,11 +1,9 @@
-import PagePlaceholder from "@/src/components/dev/PagePlaceholder";
+import ProjectShowcase from "@/src/modules/projects/ProjectShowcase";
 
 export default function MyProjectsPage() {
   return (
-    <PagePlaceholder
-      module="Student Dashboard"
-      page="My Projects"
-      route="/my-projects"
-    />
+    <main className="min-h-screen bg-gray-50">
+      <ProjectShowcase />
+    </main>
   );
 }

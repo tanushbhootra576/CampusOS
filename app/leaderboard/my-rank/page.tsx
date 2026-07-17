@@ -1,11 +1,9 @@
-import PagePlaceholder from "@/src/components/dev/PagePlaceholder";
+import LeaderboardView from "@/src/modules/leaderboard/LeaderboardView";
 
 export default function MyRankPage() {
   return (
-    <PagePlaceholder
-      module="Leaderboard"
-      page="My Rank"
-      route="/leaderboard/my-rank"
-    />
+    <main className="min-h-screen bg-gray-50">
+      <LeaderboardView />
+    </main>
   );
 }

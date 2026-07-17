@@ -1,11 +1,9 @@
-import PagePlaceholder from "@/src/components/dev/PagePlaceholder";
+import BlogList from "@/src/modules/blogs/BlogList";
 
 export default function MyBlogsPage() {
   return (
-    <PagePlaceholder
-      module="Student Dashboard"
-      page="My Blogs"
-      route="/my-blogs"
-    />
+    <main className="min-h-screen bg-gray-50">
+      <BlogList />
+    </main>
   );
 }

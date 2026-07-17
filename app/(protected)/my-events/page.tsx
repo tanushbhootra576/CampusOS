@@ -1,11 +1,9 @@
-import PagePlaceholder from "@/src/components/dev/PagePlaceholder";
+import EventList from "@/src/modules/events/EventList";
 
 export default function MyEventsPage() {
   return (
-    <PagePlaceholder
-      module="Student Dashboard"
-      page="My Events"
-      route="/my-events"
-    />
+    <main className="min-h-screen bg-gray-50">
+      <EventList />
+    </main>
   );
 }
