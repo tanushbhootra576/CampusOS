@@ -1,0 +1,8 @@
+export default function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // TODO: add shared nav/sidebar for the "Admin" section here.
+  return <>{children}</>;
+}
